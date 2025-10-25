@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel del Supervisor - Municipalidad San Román</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <img src="img/logo.png" alt="Logo" class="logo">
+    <h2>📅 Panel de Asistencias</h2>
+
+    <input type="date" id="filtroFecha" class="filtro">
+    <button class="btn" onclick="filtrarPorFecha()">Filtrar</button>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Nombre</th>
+          <th>DNI</th>
+          <th>Tipo</th>
+          <th>Hora</th>
+        </tr>
+      </thead>
+      <tbody id="tablaSupervisor"></tbody>
+    </table>
+
+    <a href="asistencia.html" class="btn">← Volver</a>
+  </div>
+
+  <script>
+    const tabla = document.getElementById("tablaSupervisor");
+    const asistencias = JSON.parse(localStorage.getItem("asistencias")) || [];
+
+    function cargarAsistencias(data) {
+      tabla.innerHTML = "";
+      data.forEach(a => {
+        const fila = `
+          <tr>
+            <td>${a.fecha}</td>
+            <td>${a.nombre}</td>
+            <td>${a.dni}</td>
+            <td>${a.tipo}</td>
+            <td>${a.hora}</td>
+          </tr>
+        `;
+        tabla.innerHTML += fila;
+      });
+    }
+
+    function filtrarPorFecha() {
+      const fecha = document.getElementById("filtroFecha").value;
+      if (!fecha) return cargarAsistencias(asistencias);
+      const filtrado = asistencias.filter(a => a.fecha === fecha);
+      cargarAsistencias(filtrado);
+    }
+
+    cargarAsistencias(asistencias);
+  </script>
+</body>
+</html>

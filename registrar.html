@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registrar Practicante - Municipalidad San Román</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <img src="img/logo.png" alt="Logo" class="logo">
+    <h2>🧑‍💼 Registro de Practicantes</h2>
+
+    <input type="text" id="nombre" placeholder="Nombre completo">
+    <input type="text" id="dni" placeholder="DNI">
+    <button class="btn" onclick="registrar()">Registrar Practicante</button>
+
+    <h3>📋 Lista de Practicantes</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>DNI</th>
+          <th>QR</th>
+          <th>Descargar</th>
+        </tr>
+      </thead>
+      <tbody id="tablaUsuarios"></tbody>
+    </table>
+
+    <a href="index.html" class="btn">← Volver</a>
+  </div>
+
+  <script>
+    const tablaUsuarios = document.getElementById("tablaUsuarios");
+
+    function cargarUsuarios() {
+      const usuarios = JSON.parse(localStorage.getItem("usuarios")) || [];
+      tablaUsuarios.innerHTML = "";
+      usuarios.forEach(u => {
+        const fila = document.createElement("tr");
+        const imgQR = document.createElement("img");
+        imgQR.width = 100;
+
+        // Generar QR visual con toda la info
+        const contenidoQR = `${u.codigo}|${u.nombre}|${u.dni}`;
+        QRCode.toDataURL(contenidoQR).then(url => {
+          imgQR.src = url;
+        });
+
+        fila.innerHTML = `
+          <td>${u.nombre}</td>
+          <td>${u.dni}</td>
+          <td></td>
+          <td><button class="btn" onclick="descargarQR('${contenidoQR}')">Descargar</button></td>
+        `;
+        fila.children[2].appendChild(imgQR);
+        tablaUsuarios.appendChild(fila);
+      });
+    }
+
+    function registrar() {
+      const nombre = document.getElementById("nombre").value.trim();
+      const dni = document.getElementById("dni").value.trim();
+
+      if (nombre === "" || dni === "") {
+        alert("⚠️ Complete todos los campos.");
+        return;
+      }
+
+      const usuarios = JSON.parse(localStorage.getItem("usuarios")) || [];
+      const codigo = "QR" + (usuarios.length + 1).toString().padStart(3, "0");
+
+      usuarios.push({ nombre, dni, codigo });
+      localStorage.setItem("usuarios", JSON.stringify(usuarios));
+
+      document.getElementById("nombre").value = "";
+      document.getElementById("dni").value = "";
+
+      cargarUsuarios();
+    }
+
+    function descargarQR(contenidoQR) {
+      const canvas = document.createElement("canvas");
+      QRCode.toCanvas(canvas, contenidoQR, function (error) {
+        if (error) console.error(error);
+        const link = document.createElement("a");
+        link.download = contenidoQR.split("|")[0] + ".png";
+        link.href = canvas.toDataURL();
+        link.click();
+      });
+    }
+
+    cargarUsuarios();
+  </script>
+</body>
+</html>
